@@ -1,0 +1,22 @@
+{
+    "files": [
+        "grammar.lark",
+        "python/Filter.py",
+        "python/Rules.py",
+        "python/secrets.py",
+        "python/TimeoutInfo.py",
+        "python/BanBot.py",
+        "python/TwitchMessage.py",
+        "python/main.py",
+        "qml/Annihilator.qml",
+        "qml/Lexicons.qml",
+        "qml/Rules.qml",
+        "qml/Settings.qml",
+        "qml/main.qml",
+        "python/TwitchManager.py",
+        "readme.md",
+        "python/IoManager.py",
+        "python/EventHandler.py",
+        "python/RulesModel.py"
+    ]
+}

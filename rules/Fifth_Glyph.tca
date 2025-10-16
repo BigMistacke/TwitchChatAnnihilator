@@ -1,0 +1,3 @@
+timeout 15 cooldown 0 reason "Has fifth glyph": [
+    contains["e"]
+]

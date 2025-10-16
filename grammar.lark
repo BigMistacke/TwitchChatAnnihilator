@@ -1,0 +1,73 @@
+?start: rules
+
+rules: config ("," config)*
+
+config: "timeout" INT ["cooldown" INT] ["reason" STRING] ":" "[" [condition] "]"
+
+condition_list: condition ("," condition)*
+
+?condition: logic_condition
+          | contains_condition
+          | role_condition
+          | gift_condition
+          | already_said_condition
+          | random_condition
+          | username_condition
+          | regex_condition
+          | length_condition
+          | emote_count_condition
+          | keyword_freq_condition
+          | caps_condition
+          | number_condition
+          | account_age_condition
+          | repeat_char_condition
+          | emoji_only_condition
+          | starts_with_condition
+          | ends_with_condition
+          | mentions_condition
+          | punctuation_condition
+
+// Composite / logical grouping of conditions
+logic_condition: LOGIC_OP "[" condition_list "]"
+
+// Match message content
+contains_condition: "contains" "[" [CONTAINS_OP] [STRING_MATCH] string_list "]"
+
+// Specific user attributes
+role_condition: "role" "[" ROLES "]"
+gift_condition: "gift" "[" GIFT INT "]"
+already_said_condition: "said" "[" [FLOAT] "]"     // chance to add to dictionary of things said
+random_condition: "random" "[" FLOAT "]"
+username_condition: "username" "[" STRING "]"
+
+// Message structure
+length_condition: "length" "[" COMP_OP INT "]"
+starts_with_condition: "starts_with" "[" [STRING_MATCH] STRING "]"
+ends_with_condition: "ends_with" "[" [STRING_MATCH] STRING "]"
+
+emoji_only_condition: "emoji_only" "[" "]"
+emote_count_condition: "emotes" "[" COMP_OP INT "]"
+keyword_freq_condition: "keywordfreq" "[" STRING "," INT "]"
+caps_condition: "caps" "[" COMP_OP INT "]"
+number_condition: "numbers" "[" "true" | "false" "]"
+account_age_condition: "accountage" "[" COMP_OP INT "]"
+repeat_char_condition: "repeatchar" "[" INT "]"
+mentions_condition: "mentions" "[" COMP_OP INT "]"
+punctuation_condition: "punctuation" "[" COMP_OP INT "]"
+regex_condition: "regex" "[" STRING "]"
+
+
+string_list: STRING ("," STRING)*
+
+LOGIC_OP: "all" | "notall" | "any" | "none" | "one"
+CONTAINS_OP: "all" | "notall" | "any" | "none" | "one" | "only"
+COMP_OP: ">" | "<" | ">=" | "<=" | "==" | "!="
+STRING_MATCH: "strict" | "loose"
+ROLES: "VIP" | "moderator" | "sub"
+GIFT: "bits" | "subs"
+
+%import common.INT
+%import common.FLOAT
+%import common.ESCAPED_STRING -> STRING
+%import common.WS
+%ignore WS
