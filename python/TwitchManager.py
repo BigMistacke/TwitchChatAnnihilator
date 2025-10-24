@@ -170,6 +170,10 @@ class TwitchManager():
         self.ban_bot_active = False
         self._ban_bot.stop()
 
+
+    def set_filters(self, filters):
+        self._ban_bot.set_filters(filters)
+
     def set_channel(self, channel):
         headers = {
             "Authorization": "Bearer " + self._access_token,

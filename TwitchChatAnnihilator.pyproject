@@ -17,6 +17,6 @@
         "readme.md",
         "python/IoManager.py",
         "python/EventHandler.py",
-        "python/RulesModel.py"
+        "python/DataModel.py"
     ]
 }

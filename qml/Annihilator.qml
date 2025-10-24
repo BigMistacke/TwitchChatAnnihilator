@@ -13,7 +13,12 @@ Item {
             ComboBox {
                 id: ruleSetCombo
                 Layout.preferredWidth: 300
-                model: RulesModel.rule_list
+                model: DataModel.rule_list
+                currentIndex: DataModel.current_index
+
+                onActivated: function(index) {
+                    EventHandler.select_rule(index)
+                }
             }
 
             Button {

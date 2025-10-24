@@ -49,4 +49,8 @@ def retrieve_rule(name):
             return file.read()
 
 
+def save_rule(name, rule):
+    if os.path.exists('./rules/'+name+".tca"):
+        with open('./rules/'+name+".tca", 'w') as file:
+            return file.write(rule)
 

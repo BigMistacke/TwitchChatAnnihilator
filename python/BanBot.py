@@ -145,3 +145,6 @@ class BanBot():
 
     def set_channel(self, id):
         self.channel = id
+
+    def set_filters(self, filters):
+        self.filters = filters

@@ -9,7 +9,7 @@ import time
 from TimeoutInfo import TimeoutInfo
 from TwitchManager import TwitchManager
 from EventHandler import EventHandler
-from RulesModel import RulesModel
+from DataModel import DataModel
 import IoManager
 
 import Filter
@@ -26,20 +26,20 @@ def main():
     app = QApplication(sys.argv)
     engine = QQmlApplicationEngine()
 
-    timeout_info = TimeoutInfo()
 
     rule_list = IoManager.retrieve_rule_list()
-    rules_model = RulesModel()
-    rules_model.update_list(rule_list)
+    current_rule = IoManager.retrieve_rule(rule_list[0])
+    filters = Filter.create_filter(current_rule)
 
-    filters = Filter.create_filter(IoManager.retrieve_rule(rule_list[0]))
+    timeout_info = TimeoutInfo()
     twitch_manager = TwitchManager(filters, timeout_info)
 
-    event_handler = EventHandler(twitch_manager)
+    data_model = DataModel()
+    event_handler = EventHandler(twitch_manager, data_model)
 
     engine.rootContext().setContextProperty("TimeoutInfo", timeout_info)
     engine.rootContext().setContextProperty("EventHandler", event_handler)
-    engine.rootContext().setContextProperty("RulesModel", rules_model)
+    engine.rootContext().setContextProperty("DataModel", data_model)
 
 
     engine.load(QUrl("qml/main.qml"))
