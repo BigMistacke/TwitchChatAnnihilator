@@ -7,6 +7,7 @@ from BanBot import BanBot
 import secrets #This stores stuff I don't want in the commits like the client id.  The only thing in it are a few hard coded variables
 import IoManager
 
+
 class TwitchManager():
     def __init__(self, filters, timeout_info):
         self._client_id = secrets.client_id

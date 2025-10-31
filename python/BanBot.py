@@ -81,8 +81,8 @@ class BanBot():
                 print(response)
                 break
 
-            while( not self.stop_event.is_set()):
-            # while( not self.stop_event.is_set() and time.time() < deadline):
+            # while( not self.stop_event.is_set()):
+            while( not self.stop_event.is_set() and time.time() < deadline):
                 message = ws.recv()
                 message_json = json.loads(message)
 

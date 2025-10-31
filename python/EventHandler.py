@@ -36,11 +36,9 @@ class EventHandler(QObject):
 
 
 
-
-    @Slot(result=str)
-    def get_rule_list():
-        return IoManager.get_rule_list()
-
+    def update_list(self):
+        rule_list = IoManager.retrieve_rule_list()
+        self.data_model.update_list(rule_list)
 
     @Slot(int)
     def select_rule(self, index):
@@ -58,4 +56,29 @@ class EventHandler(QObject):
     def save_rule(self, new_rule):
         current_rule = self.data_model.current_rule_name()
         IoManager.save_rule(current_rule, new_rule)
+
+
+    @Slot(str, str)
+    def rename_rule(self, new_rule, new_name):
+        current_rule = self.data_model.current_rule_name()
+        IoManager.delete_rule(current_rule)
+        IoManager.save_rule(new_name, new_rule)
+        self.update_list()
+
+
+    @Slot()
+    def delete_rule(self):
+        current_rule = self.data_model.current_rule_name()
+        IoManager.delete_rule(current_rule)
+        self.update_list()
+        self.select_rule(0)
+
+
+    @Slot(result=str)
+    def new_rule(self):
+        new_rule = IoManager.new_rule()
+        self.update_list()
+        rule_list = IoManager.retrieve_rule_list()
+        index = rule_list.index(new_rule)
+        self.select_rule(rule_list.index(new_rule))
 

@@ -34,23 +34,54 @@ def save_settings(settings):
 
 def retrieve_rule_list():
     rule_list = []
-    if os.path.exists('./rules'):
+    if os.path.exists("./rules"):
         for f in os.scandir("./rules"):
             if f.is_file() and f.name.endswith(".tca"):
                 rule_list.append(f.name[:-4])
     else:
-        os.mkdir('./rules')
+        os.mkdir("./rules")
 
-    return rule_list
+    return sorted(rule_list)
 
 def retrieve_rule(name):
-    if os.path.exists('./rules/'+name+".tca"):
-        with open('./rules/'+name+".tca", 'r') as file:
+    if os.path.exists("./rules/"+name+".tca"):
+        with open("./rules/"+name+".tca", 'r') as file:
             return file.read()
 
 
 def save_rule(name, rule):
-    if os.path.exists('./rules/'+name+".tca"):
-        with open('./rules/'+name+".tca", 'w') as file:
-            return file.write(rule)
+    with open("./rules/"+name+".tca", 'w') as file:
+        return file.write(rule)
+
+def delete_rule(name):
+    if os.path.exists("./rules/"+name+".tca"):
+        os.remove("./rules/"+name+".tca")
+
+
+def new_rule():
+    rule_name = "new_rule"
+    counter = 1
+
+    blank_rule = """timeout 5 cooldown 0: [
+
+]"""
+
+    if os.path.exists("./rules/"+rule_name+".tca"):
+        while os.path.exists("./rules/"+rule_name+str(counter)+".tca"):
+            counter += 1
+
+        rule_name = rule_name + str(counter)
+        with open("./rules/"+rule_name+".tca", 'w') as file:
+            file.write(blank_rule)
+
+    else:
+        with open("./rules/"+rule_name+".tca", 'w') as file:
+            file.write(blank_rule)
+
+    return rule_name
+
+
+
+
+
 
