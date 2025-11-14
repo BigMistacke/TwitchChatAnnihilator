@@ -9,11 +9,11 @@ import IoManager
 
 
 class TwitchManager():
-    def __init__(self, filters, timeout_info):
+    def __init__(self, filter, timeout_info):
         self._client_id = secrets.client_id
         self._scope = "moderator:manage:banned_users user:write:chat user:read:chat"
 
-        self._ban_bot = BanBot(filters, timeout_info)
+        self._ban_bot = BanBot(filter, timeout_info)
 
         self.stop_event = threading.Event()
         self.refresh_thread = threading.Thread(target=self._renew_tokens_loop)
@@ -172,8 +172,8 @@ class TwitchManager():
         self._ban_bot.stop()
 
 
-    def set_filters(self, filters):
-        self._ban_bot.set_filters(filters)
+    def set_filter(self, filter):
+        self._ban_bot.set_filter(filter)
 
     def set_channel(self, channel):
         headers = {

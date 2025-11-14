@@ -19,7 +19,7 @@ def create_filter(rule):
 class TreeToObject(Transformer):
 
     def rules(self, *rules):
-        return list(rules)
+        return Rules.Start(list(rules))
 
     def config(self, timeout, cooldown=0, reason="", condition=None):
         if reason == None:

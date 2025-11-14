@@ -14,13 +14,7 @@ import IoManager
 
 import Filter
 
-
-Rulez = '''
-timeout 15 cooldown 0 reason "Has fifth glyph": [
-    contains["e"]
-]
-'''
-
+from TwitchMessage import TwitchMessage
 
 def main():
     app = QApplication(sys.argv)
@@ -29,10 +23,10 @@ def main():
 
     rule_list = IoManager.retrieve_rule_list()
     current_rule = IoManager.retrieve_rule(rule_list[0])
-    filters = Filter.create_filter(current_rule)
+    filter = Filter.create_filter(current_rule)
 
     timeout_info = TimeoutInfo()
-    twitch_manager = TwitchManager(filters, timeout_info)
+    twitch_manager = TwitchManager(filter, timeout_info)
 
     data_model = DataModel()
     event_handler = EventHandler(twitch_manager, data_model)

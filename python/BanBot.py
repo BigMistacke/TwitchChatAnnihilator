@@ -9,7 +9,7 @@ from TwitchMessage import TwitchMessage
 
 
 class BanBot():
-    def __init__(self, filters, timeout_info):
+    def __init__(self, filter, timeout_info):
         self.access_token = ""
         self.client_id = secrets.client_id
 
@@ -19,7 +19,7 @@ class BanBot():
 
         self.running = True
 
-        self.filters = filters
+        self.filter = filter
         self.timeout_info = timeout_info
 
         self.stop_event = threading.Event()
@@ -106,11 +106,8 @@ class BanBot():
 
 
     def _check_message(self, message):
-        result = ""
-        for filter in self.filters:
-            result = filter.evaluate(message)
-            if(result[0] == True):
-                break
+        result = self.filter.evaluate(message)
+
 
         if (not self.stop_event.is_set()):
             self.timeout_info.update_data(message.user, message.body, result[2], result[1], result[0])
@@ -146,5 +143,5 @@ class BanBot():
     def set_channel(self, id):
         self.channel = id
 
-    def set_filters(self, filters):
-        self.filters = filters
+    def set_filter(self, filter):
+        self.filter = filter

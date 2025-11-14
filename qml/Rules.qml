@@ -192,7 +192,9 @@ Item {
 
             Button {
                 text: "Run Test"
-
+                onClicked: {
+                    EventHandler.test_rule(ruleEditor.text, testCaseEditor.text)
+                }
             }
         }
 

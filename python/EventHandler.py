@@ -1,5 +1,6 @@
 from PySide6.QtCore import QObject, Slot
 
+from TwitchMessage import TwitchMessage
 import IoManager
 import Filter
 
@@ -17,11 +18,25 @@ class EventHandler(QObject):
         self.data_model.update_list(rule_list)
         self.data_model.update_current(current_rule)
 
+    def create_filter(self):
+        rule_list = IoManager.retrieve_rule_list()
+        index = self.data_model.current_index
+        current_rule = IoManager.retrieve_rule(rule_list[index])
+
+        filter = Filter.create_filter(current_rule)
+        self._twitch_manager.set_filter(filter)
+
+    def update_list(self):
+        rule_list = IoManager.retrieve_rule_list()
+        self.data_model.update_list(rule_list)
+
+
     @Slot()
     def toggle_ban_bot(self):
         if(self._twitch_manager.ban_bot_active):
             self._twitch_manager.stop_ban_bot()
         else:
+            self.create_filter()
             self._twitch_manager.start_ban_bot()
 
 
@@ -36,17 +51,10 @@ class EventHandler(QObject):
 
 
 
-    def update_list(self):
-        rule_list = IoManager.retrieve_rule_list()
-        self.data_model.update_list(rule_list)
-
     @Slot(int)
     def select_rule(self, index):
         rule_list = IoManager.retrieve_rule_list()
         current_rule = IoManager.retrieve_rule(rule_list[index])
-
-        filters = Filter.create_filter(current_rule)
-        self._twitch_manager.set_filters(filters)
 
         self.data_model.update_current(current_rule)
         self.data_model.update_index(index)
@@ -82,3 +90,11 @@ class EventHandler(QObject):
         index = rule_list.index(new_rule)
         self.select_rule(rule_list.index(new_rule))
 
+
+    @Slot(str, str, result='QVariantMap')
+    def test_rule(self, rule, message):
+        filter = Filter.create_filter(rule)
+        twitch_message = TwitchMessage(message, "user")
+        results = filter.test(twitch_message, 1000)
+        print(results)
+        return results
