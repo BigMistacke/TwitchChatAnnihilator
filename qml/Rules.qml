@@ -193,7 +193,16 @@ Item {
             Button {
                 text: "Run Test"
                 onClicked: {
-                    EventHandler.test_rule(ruleEditor.text, testCaseEditor.text)
+                    let dict = EventHandler.test_rule(ruleEditor.text, testCaseEditor.text)
+                    let keys = Object.keys(dict)
+                    let results = ""
+
+                    for (let i = 0; i < keys.length; i++) {
+                        let key = keys[i]
+                        let value = dict[key]
+                        results = results + key + ": " + value + "%\n"
+                    }
+                    testResults.text = results
                 }
             }
         }
@@ -237,6 +246,7 @@ Item {
             border.color: "#cccccc"
 
             Text {
+                id: testResults
                 anchors.centerIn: parent
                 text: ""
                 wrapMode: Text.WordWrap

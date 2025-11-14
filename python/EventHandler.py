@@ -96,5 +96,4 @@ class EventHandler(QObject):
         filter = Filter.create_filter(rule)
         twitch_message = TwitchMessage(message, "user")
         results = filter.test(twitch_message, 1000)
-        print(results)
         return results
