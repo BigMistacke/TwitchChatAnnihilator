@@ -9,30 +9,31 @@ import IoManager
 
 
 class TwitchManager():
-    def __init__(self, filter, timeout_info):
+    def __init__(self, filter, timeout_info, twitch_model):
         self._client_id = secrets.client_id
         self._scope = "moderator:manage:banned_users user:write:chat user:read:chat"
 
         self._ban_bot = BanBot(filter, timeout_info)
+        self._twitch_model = twitch_model
 
         self.stop_event = threading.Event()
-        self.refresh_thread = threading.Thread(target=self._renew_tokens_loop)
+        self._refresh_thread = threading.Thread(target=self._renew_tokens_loop)
 
         self._access_token = ""
         self._refresh_token = ""
         self._expiry = 0
-        self.logged_in = True
-        self.ban_bot_active = False
 
         tokens = IoManager.load_tokens()
         if "refresh_token" in tokens:
             self._refresh_token = tokens["refresh_token"]
-            self._renew_tokens()
 
-            self._get_user_id()
-            self.start_token_check()
+            if not self._access_token == "":
+                self._get_user_id()
+                self.start_token_check()
 
-        self.set_channel("madramimi")
+        settings = IoManager.load_settings()
+        if "channel" in settings:
+            self.set_channel(setting["channel"])
 
 
 
@@ -51,7 +52,7 @@ class TwitchManager():
             token_thread = threading.Thread(target=self._get_new_tokens, args=( response_json["device_code"], response_json["expires_in"], response_json["interval"]), daemon=True)
             token_thread.start()
 
-            return response_json["verification_uri"]
+            return response_json["verification_uri"], response_json["user_code"]
 
 
     def _get_new_tokens(self, device_code, expires_in=1800, interval=5):
@@ -77,8 +78,8 @@ class TwitchManager():
                 self._ban_bot.set_token(self._access_token)
                 self._refresh_token = response_data["refresh_token"]
                 self._expiry = response_data["expires_in"] + time.time()
-                self.logged_in = True
 
+                self._twitch_model.update_login(True)
                 self._get_user_id()
                 self.start_token_check()
 
@@ -109,6 +110,18 @@ class TwitchManager():
 
             time.sleep(interval)
 
+    def logout():
+        self.stop_event.set()
+        self._twitch_model.update_login(False)
+        self.start_ban_bot()
+        self._access_token = ""
+        self._refresh_token = ""
+        self._expiry = 0
+        self._ban_bot.set_token("")
+        self._ban_bot.set_user_id("")
+        IoManager.save_tokens({
+            "refresh_token": "self._refresh_token"
+        })
 
     def _renew_tokens(self):
         headers = {
@@ -128,20 +141,20 @@ class TwitchManager():
             self._ban_bot.set_token(self._access_token)
             self._refresh_token = data["refresh_token"]
             self._expiry = data["expires_in"] + time.time()
-            self.logged_in = True
+            self._twitch_model.update_login(True)
+
 
             tokens = {
                 "refresh_token": self._refresh_token
             }
             IoManager.save_tokens(tokens)
 
+        #I'm not sure if I need to specifically join the threads in order to avoid a memory leak
         elif response.status_code == 400:
             if data["message"] == "missing refresh token":
-                self.logged_in = False
-                self.stop_token_check()
+                self.logout()
             if data["message"] == "Invalid refresh token":
-                self.logged_in = False
-                self.stop_token_check()
+                self.logout()
             else:
                 print("Unexpected error: {error}")
 
@@ -154,21 +167,22 @@ class TwitchManager():
 
 
     def start_token_check(self):
+        self._refresh_thread = threading.Thread(target=self._renew_tokens_loop)
         self.stop_event.clear()
-        self.refresh_thread.start()
+        self._refresh_thread.start()
 
-    def stop_token_check(self):
+    def kill_manager(self):
+        self.stop_ban_bot()
         self.stop_event.set()
-        self.refresh_thread.join()
 
 
     #Catch 'invalid token' error, try to refresh token, otherwise 'logout'
     def start_ban_bot(self):
-        self.ban_bot_active = True
+        self._twitch_model.update_running(True)
         self._ban_bot.start()
 
     def stop_ban_bot(self):
-        self.ban_bot_active = False
+        self._twitch_model.update_running(False)
         self._ban_bot.stop()
 
 
@@ -176,6 +190,7 @@ class TwitchManager():
         self._ban_bot.set_filter(filter)
 
     def set_channel(self, channel):
+        self._twitch_model.update_channel(channel)
         headers = {
             "Authorization": "Bearer " + self._access_token,
             "Client-Id": self._client_id,
@@ -185,8 +200,14 @@ class TwitchManager():
         response = requests.get(f"https://api.twitch.tv/helix/users?login={channel}", headers=headers)
         data = response.json()
 
-        if data["data"] != []:
-            self._ban_bot.set_channel(data["data"][0]["id"])
+        if data["data"] != [] and data["data"][0]["id"]:
+            try:
+                self._ban_bot.set_channel(data["data"][0]["id"])
+                self._twitch_model.update_channel(channel)
+            except:
+                pass
+                #Should set up a proper error here
+
 
 
     def _get_user_id(self):
@@ -198,5 +219,5 @@ class TwitchManager():
         response = requests.get("https://id.twitch.tv/oauth2/validate", headers=headers)
         data = response.json()
         self._ban_bot.set_user_id(data["user_id"])
-
+        self._twitch_model.update_user(data["login"])
 

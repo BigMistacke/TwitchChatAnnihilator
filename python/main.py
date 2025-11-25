@@ -10,6 +10,7 @@ from TimeoutInfo import TimeoutInfo
 from TwitchManager import TwitchManager
 from EventHandler import EventHandler
 from DataModel import DataModel
+from TwitchModel import TwitchModel
 import IoManager
 
 import Filter
@@ -25,15 +26,18 @@ def main():
     current_rule = IoManager.retrieve_rule(rule_list[0])
     filter = Filter.create_filter(current_rule)
 
+    twitch_model = TwitchModel()
     timeout_info = TimeoutInfo()
-    twitch_manager = TwitchManager(filter, timeout_info)
+    twitch_manager = TwitchManager(filter, timeout_info, twitch_model)
 
     data_model = DataModel()
-    event_handler = EventHandler(twitch_manager, data_model)
+    event_handler = EventHandler(twitch_manager, data_model, twitch_model)
+
 
     engine.rootContext().setContextProperty("TimeoutInfo", timeout_info)
     engine.rootContext().setContextProperty("EventHandler", event_handler)
     engine.rootContext().setContextProperty("DataModel", data_model)
+    engine.rootContext().setContextProperty("TwitchModel", twitch_model)
 
 
     engine.load(QUrl("qml/main.qml"))
@@ -42,6 +46,7 @@ def main():
         sys.exit(-1)
 
     sys.exit(app.exec())
+    twitch_model.kill_manager()
 
 if __name__ == "__main__":
     main()

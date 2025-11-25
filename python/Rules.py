@@ -16,6 +16,7 @@ class Start:
 
     def test(self, message, trials=1000):
         message_counts = {}
+        total_misses = 100
 
         for x in range(trials):
             for filter in self.filters:
@@ -27,8 +28,10 @@ class Start:
                     message_counts[result[2]] += 1
 
         for message in message_counts:
+            total_misses = total_misses - message_counts[message] * 100 / trials
             message_counts[message] = message_counts[message] * 100 / trials
 
+        # message_counts.setdefault("No timeout", total_misses)
         return message_counts
 
 

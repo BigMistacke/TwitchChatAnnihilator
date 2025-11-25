@@ -22,7 +22,7 @@ Item {
             }
 
             Button {
-                text: running ? "Show Mercy" : "Commence Annihilation"
+                text: TwitchModel.current_running ? "Show Mercy" : "Commence Annihilation"
                 Layout.preferredWidth: 300
                 Layout.fillHeight: true
                 font.pixelSize: 24
@@ -30,16 +30,21 @@ Item {
                 background: Rectangle {
                     anchors.fill: parent
                     color: {
-                        if(running){
+                        if(TwitchModel.current_running){
                             parent.down ? darkenColor("#12e04c", 0.3) : (parent.hovered ? "#12e04c" : darkenColor("#12e04c", 0.1))
-                        }else{
+                            // EventHandler.start_ban_bot()
+                        }else {
                             parent.down ? darkenColor("#a81b1b", 0.3) : (parent.hovered ? "#a81b1b" : darkenColor("#a81b1b", 0.1))
+                            // EventHandler.stop_ban_bot()
                         }
                     }
                 }
                 onClicked: {
-                    running = !running
-                    EventHandler.toggle_ban_bot()
+                    if(TwitchModel.current_running){
+                        EventHandler.start_ban_bot()
+                    }else {
+                        EventHandler.stop_ban_bot()
+                    }
                 }
             }
         }

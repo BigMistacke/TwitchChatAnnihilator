@@ -6,7 +6,7 @@ import Filter
 
 
 class EventHandler(QObject):
-    def __init__(self, twitch_manager, data_model):
+    def __init__(self, twitch_manager, data_model, twitch_model):
         super().__init__()
 
         self._twitch_manager = twitch_manager
@@ -32,17 +32,23 @@ class EventHandler(QObject):
 
 
     @Slot()
-    def toggle_ban_bot(self):
-        if(self._twitch_manager.ban_bot_active):
-            self._twitch_manager.stop_ban_bot()
-        else:
-            self.create_filter()
-            self._twitch_manager.start_ban_bot()
+    def start_ban_bot(self):
+        self.create_filter()
+        self._twitch_manager.start_ban_bot()
+
+    @Slot()
+    def stop_ban_bot(self):
+        self._twitch_manager.stop_ban_bot()
 
 
-    @Slot(result=str)
+    @Slot(result='QVariantMap')
     def login(self):
-        return self._twitch_manager.login()
+        url, code = self._twitch_manager.login()
+        return {"url": url, "code": code}
+
+    @Slot()
+    def logout(self):
+        return self._twitch_manager.logout()
 
     @Slot(str)
     def set_channel(self, channel):

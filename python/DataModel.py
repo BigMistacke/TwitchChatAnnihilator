@@ -31,6 +31,7 @@ class DataModel(QAbstractListModel):
         self._current_rule = rule
         self.currentRuleChanged.emit()
 
+    @Property("QString", notify=currentRuleChanged)
     def current_rule_name(self):
         return self._rule_list[self._current_index]
 

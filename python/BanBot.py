@@ -26,6 +26,7 @@ class BanBot():
         self.thread = threading.Thread(target=self._create_session)
 
 
+    #Need to add errors to make sure thread can be started (has all required info)
     def start(self):
         self.thread = threading.Thread(target=self._create_session)
         self.stop_event.clear()
