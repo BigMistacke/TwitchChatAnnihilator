@@ -92,27 +92,17 @@ class BanBot():
                 if(message_type == "session_keepalive"):
                     deadline = time.time() + keep_alive_timer
                 else:
-                    twitch_message = self._format_message(message_json.get("payload", {}))
+                    twitch_message = TwitchMessage(message_json.get("payload", {}))
                     self._check_message(twitch_message)
-
-                time.sleep(0.5)
-
-
-    def _format_message(self, message):
-        body = message.get("event", {}).get("message", {}).get("text", {})
-        user = message.get("event", {}).get("chatter_user_name", {})
-
-        twitch_message = TwitchMessage(body, user)
-        return twitch_message
 
 
     def _check_message(self, message):
         result = self.filter.evaluate(message)
 
-
         if (not self.stop_event.is_set()):
             self.timeout_info.update_data(message.user, message.body, result[2], result[1], result[0])
             self.ban_user(message.user, result[1], result[2])
+
 
     def ban_user(self, target, duration, message):
         url = f"https://api.twitch.tv/helix/moderation/bans?broadcaster_id={self.channel}&moderator_id={self.user_id}"

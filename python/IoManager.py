@@ -81,7 +81,45 @@ def new_rule():
     return rule_name
 
 
+def load_messages_said():
+    loaded_messages= []
 
+    try:
+        with open("said_messages.txt", 'r') as f:
+            # Read all lines from the file
+            lines = f.readlines()
 
+            # Strip the newline character from each line
+            loaded_messages = [line.strip() for line in lines]
 
+        return(loaded_messages)
+
+    except FileNotFoundError:
+        return []
+
+def save_messages_said(messages):
+    with open("said_messages.txt", 'w') as f:
+        for message in messages:
+            f.write(word + '\n')
+
+def load_words_said():
+    loaded_words = []
+
+    try:
+        with open("said_words.txt", 'r') as f:
+            # Read all lines from the file
+            lines = f.readlines()
+
+            # Strip the newline character from each line
+            loaded_words = [line.strip() for line in lines]
+
+        return(loaded_words)
+
+    except FileNotFoundError:
+        return []
+
+def save_words_said(words):
+    with open("said_words.txt", 'w') as f:
+        for word in words:
+            f.write(word + '\n')
 

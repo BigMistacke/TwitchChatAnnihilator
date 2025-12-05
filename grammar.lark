@@ -1,70 +1,69 @@
 ?start: rules
 
-rules: config ("," config)*
+rules: config+
 
-config: "timeout" INT ["cooldown" INT] ["reason" STRING] ":" "[" [condition] "]"
+config: ["timeout" INT] ["cooldown" INT] ["reason" STRING] "-" condition
 
 condition_list: condition ("," condition)*
 
 ?condition: logic_condition
           | contains_condition
           | role_condition
-          | gift_condition
-          | already_said_condition
+          | bit_condition
+          | word_said_condition
+          | message_said_condition
           | random_condition
-          | username_condition
           | regex_condition
           | length_condition
           | emote_count_condition
-          | keyword_freq_condition
           | caps_condition
-          | number_condition
-          | account_age_condition
-          | repeat_char_condition
-          | emoji_only_condition
           | starts_with_condition
           | ends_with_condition
-          | mentions_condition
+          | mention_condition
           | punctuation_condition
+          | user_contains_condition
+          | user_start_with_condition
+          | user_ends_with_condition
 
-// Composite / logical grouping of conditions
+// Logic
 logic_condition: LOGIC_OP "[" condition_list "]"
 
-// Match message content
+# Message text match
 contains_condition: "contains" "[" [CONTAINS_OP] [STRING_MATCH] string_list "]"
-
-// Specific user attributes
-role_condition: "role" "[" ROLES "]"
-gift_condition: "gift" "[" GIFT INT "]"
-already_said_condition: "said" "[" [FLOAT] "]"     // chance to add to dictionary of things said
-random_condition: "random" "[" FLOAT "]"
-username_condition: "username" "[" STRING "]"
-
-// Message structure
-length_condition: "length" "[" COMP_OP INT "]"
 starts_with_condition: "starts_with" "[" [STRING_MATCH] STRING "]"
 ends_with_condition: "ends_with" "[" [STRING_MATCH] STRING "]"
-
-emoji_only_condition: "emoji_only" "[" "]"
-emote_count_condition: "emotes" "[" COMP_OP INT "]"
-keyword_freq_condition: "keywordfreq" "[" STRING "," INT "]"
-caps_condition: "caps" "[" COMP_OP INT "]"
-number_condition: "numbers" "[" "true" | "false" "]"
-account_age_condition: "accountage" "[" COMP_OP INT "]"
-repeat_char_condition: "repeatchar" "[" INT "]"
-mentions_condition: "mentions" "[" COMP_OP INT "]"
-punctuation_condition: "punctuation" "[" COMP_OP INT "]"
 regex_condition: "regex" "[" STRING "]"
 
+# Message text elements
+emote_count_condition: "emotes" "[" COMP_OP INT "]"
+punctuation_condition: "punctuation" "[" COMP_OP INT "]"
+length_condition: "length" "[" COMP_OP INT "]"
+caps_condition: "caps" "[" COMP_OP FLOAT "]"
+word_said_condition: "said_word" "[" [PERSISTANCE] [STRING_MATCH] [FLOAT] "]"
+message_said_condition: "said_message" "[" [PERSISTANCE] [STRING_MATCH] [FLOAT] "]"
+
+//Message attributes
+bit_condition: "bits" "[" COMP_OP INT "]"
+mention_condition: "mentions" "[" COMP_OP INT "]"
+
+//Username
+user_contains_condition: "user_contains" "[" [CONTAINS_OP] [STRING_MATCH] string_list "]"
+user_start_with_condition: "user_starts" "[" [STRING_MATCH] STRING "]"
+user_ends_with_condition: "user_ends" "[" [STRING_MATCH] STRING "]"
+role_condition: "role" "[" ROLE "]"
+
+// Other
+random_condition: "random" "[" FLOAT "]"
 
 string_list: STRING ("," STRING)*
 
 LOGIC_OP: "all" | "notall" | "any" | "none" | "one"
 CONTAINS_OP: "all" | "notall" | "any" | "none" | "one" | "only"
-COMP_OP: ">" | "<" | ">=" | "<=" | "==" | "!="
+//COMPARISON_OP: "contains" | "starts_with" | "ends_with"
+COMP_OP: ">" | "<" | "==" | "!="
 STRING_MATCH: "strict" | "loose"
-ROLES: "VIP" | "moderator" | "sub"
-GIFT: "bits" | "subs"
+ROLE: "VIP" | "moderator" | "sub"
+PERSISTANCE: "save" | "no_save"
 
 %import common.INT
 %import common.FLOAT

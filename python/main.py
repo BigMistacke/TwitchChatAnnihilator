@@ -12,7 +12,6 @@ from EventHandler import EventHandler
 from DataModel import DataModel
 from TwitchModel import TwitchModel
 import IoManager
-
 import Filter
 
 from TwitchMessage import TwitchMessage
