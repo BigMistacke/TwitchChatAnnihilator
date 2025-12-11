@@ -168,7 +168,7 @@ class LengthIs:
         self.target = target
 
     def evaluate(self, message):
-        return self.comparator(message.body, self.target)
+        return self.comparator(len(message.body), self.target)
 
 
 class AlreadySaidMessage:

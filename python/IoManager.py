@@ -1,5 +1,6 @@
 import json
 import os
+import string
 
 def load_tokens():
     if os.path.exists('tokens.json'):
@@ -123,3 +124,43 @@ def save_words_said(words):
         for word in words:
             f.write(word + '\n')
 
+
+
+def load_lexicon(lexicon):
+    with open(lexicon + ".json", 'r') as file:
+        loaded_list = json.load(file)
+        return loaded_list
+
+
+def save_lexicon(name, lexicon_string):
+    lexicon_list = json.loads("[" + lexicon_string + "]")
+
+    #Remove non-unique elements
+    unique_elements = set(lexicon_list)
+    lexicon = list(unique_elements)
+
+    file_path = name + ".json"
+
+    with open(file_path, 'w') as file:
+        json.dump(lexicon, file, indent=4)
+
+def import_lexicon(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            file_content = file.read()
+
+    except FileNotFoundError:
+        print(f"Error: The file '{file_path}' was not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+    #Remove punctuation
+    translator = str.maketrans('', '', string.punctuation)
+    cleaned_text = file_content.translate(translator)
+    word_list = cleaned_text.split()
+
+    #Remove non-unique elements
+    unique_elements = set(word_list)
+    lexicon = list(unique_elements)
+    return json.dumps(lexicon)

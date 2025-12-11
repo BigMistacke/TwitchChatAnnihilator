@@ -1,6 +1,6 @@
 from lark import Lark, Transformer, v_args
 import Rules
-
+import LexiconManager
 
 def create_filter(rule):
     with open("grammar.lark") as f:
@@ -17,6 +17,12 @@ def create_filter(rule):
 
 @v_args(inline=True)
 class TreeToObject(Transformer):
+
+    def __init__(self):
+        self.lexi_man = LexiconManager.LexiconManager()
+        super()
+
+
 
     def rules(self, *rules):
         return Rules.Start(list(rules))
@@ -46,122 +52,72 @@ class TreeToObject(Transformer):
 
 
     #Text match
-    def contains_condition(self, *args):
-        CONTAINS_MODES = {
-            "any":    lambda message, targets: any(target in message for target in targets),
-            "all":    lambda message, targets: all(target in message for target in targets),
-            "none":   lambda message, targets: all(target not in message for target in targets),
-            "notall": lambda message, targets: not all(target in message for target in targets),
-            "one":    lambda message, targets: sum(1 for target in targets if target in message) == 1,
-            "only":   lambda message, targets: all(word in targets for word in message.split())
-        }
+    def contains_condition(self, op, string_match, targets):
+        if op == None:
+            evaluator = get_contains_func("any")
+        else:
+            evaluator = get_contains_func(op)
 
-        evaluator = CONTAINS_MODES["any"]
-
-        # Default cleaner (lowercase everything)
-        cleaner = lambda message: message.lower()
-        targets = []
-
-        for arg in args:
-            if isinstance(arg, list):
-                targets = arg
-            elif isinstance(arg, str):
-                if arg in CONTAINS_MODES:
-                    evaluator = CONTAINS_MODES[arg]
-                elif arg == "strict":
-                    # No cleaning
-                    cleaner = lambda message: message
+        if string_match == None:
+            cleaner = get_cleaner_func("loose")
+        else:
+            cleaner = get_cleaner_func(string_match)
 
         cleaned_targets = [cleaner(target) for target in targets]
         return Rules.Contains(evaluator, cleaner, cleaned_targets)
 
-    def starts_with_condition(self, *args):
-        # Default cleaner (lowercase everything)
-        cleaner = lambda message: message.lower()
-        target = ""
 
-        for arg in args:
-            if arg == "strict":
-                # No cleaning
-                cleaner = lambda message: message
-            else:
-                target = arg
-
+    def starts_with_condition(self, string_match, target):
+        if string_match == None:
+            cleaner = get_cleaner_func("loose")
+        else:
+            cleaner = get_cleaner_func(string_match)
 
         cleaned_target = cleaner(target)
         return Rules.StartsWith(cleaner, cleaned_target)
 
-    def ends_with_condition(self, *args):
-        # Default cleaner (lowercase everything)
-        cleaner = lambda message: message.lower()
-        target = ""
 
-        for arg in args:
-            if arg == "strict":
-                # No cleaning
-                cleaner = lambda message: message
-            else:
-                target = arg
-
+    def ends_with_condition(self, string_match, target):
+        if string_match == None:
+            cleaner = get_cleaner_func("loose")
+        else:
+            cleaner = get_cleaner_func(string_match)
 
         cleaned_target = cleaner(target)
         return Rules.EndsWth(cleaner, cleaned_target)
+
 
     def regex_condition(self, regex):
         return Rules.RegexRule(regex)
 
 
+
     # Text element
     def caps_condition(self, comparison, target):
-        COMPARISON_MODES = {
-            ">":    lambda caps, target: caps >  target,
-            "<":    lambda caps, target: caps <  target,
-            "==":   lambda caps, target: caps == target,
-            "!=":   lambda caps, target: caps != target
-        }
-
-        comparator = COMPARISON_MODES[comparison]
+        comparator = get_comparison_func(comparison)
         return Rules.CapsCount(comparator, target)
 
-    def length_condition(self, comparison, target):
-        COMPARISON_MODES = {
-            ">":    lambda message, target: len(message) > target,
-            "<":    lambda message, target: len(message) < target,
-            "==":   lambda message, target: len(message) == target,
-            "!=":   lambda message, target: len(message) != target
-        }
 
-        comparator = COMPARISON_MODES[comparison]
+    def length_condition(self, comparison, target):
+        comparator = get_comparison_func(comparison)
         return Rules.LengthIs(comparator, target)
 
-    def punctuation_condition(self, comparison, target):
-        COMPARISON_MODES = {
-            ">":    lambda count, target: count > target,
-            "<":    lambda count, target: count < target,
-            "==":   lambda count, target: count == target,
-            "!=":   lambda count, target: count != target
-        }
 
-        comparator = COMPARISON_MODES[comparison]
+    def punctuation_condition(self, comparison, target):
+        comparator = get_comparison_func(comparison)
         return Rules.PunctuationCount(comparator, target)
 
-    def emote_count_condition(self, comparison, target):
-        COMPARISON_MODES = {
-            ">":    lambda emotes, target: emotes > target,
-            "<":    lambda emotes, target: emotes < target,
-            "==":   lambda emotes, target: emotes == target,
-            "!=":   lambda emotes, target: emotes != target
-        }
 
-        comparator = COMPARISON_MODES[comparison]
+    def emote_count_condition(self, comparison, target):
+        comparator = get_comparison_func(comparison)
         return Rules.EmoteCount(comparator, target)
 
+
     def word_said_condition(self, persistence, string_match, chance):
-        # Default cleaner (lowercase everything)
         if string_match == None:
-            cleaner = lambda message: message.lower()
+            cleaner = get_cleaner_func("loose")
         elif string_match == "strict":
-            cleaner = lambda message: message
+            cleaner = get_cleaner_func(string_match)
 
         if persistence == None:
             persistance = False
@@ -171,12 +127,12 @@ class TreeToObject(Transformer):
 
         return Rules.AlreadySaidWord(cleaner, persistance, chance)
 
+
     def message_said_condition(self, persistence, string_match, chance):
-        # Default cleaner (lowercase everything)
         if string_match == None:
-            cleaner = lambda message: message.lower()
+            cleaner = get_cleaner_func("loose")
         elif string_match == "strict":
-            cleaner = lambda message: message
+            cleaner = get_cleaner_func(string_match)
 
         if persistence == None:
             persistance = False
@@ -190,25 +146,11 @@ class TreeToObject(Transformer):
 
     #Message attributes
     def bit_condition(self, comparison, target):
-        COMPARISON_MODES = {
-            ">":    lambda bits, target: bits > target,
-            "<":    lambda bits, target: bits < target,
-            "==":   lambda bits, target: bits == target,
-            "!=":   lambda bits, target: bits != target
-        }
-
-        comparator = COMPARISON_MODES[comparison]
+        comparator = get_comparison_func(comparison)
         return Rules.BitsAre(comparator, target)
 
     def mention_condition(self, comparison, target):
-        COMPARISON_MODES = {
-            ">":    lambda mentions, target: mentions > target,
-            "<":    lambda mentions, target: mentions < target,
-            "==":   lambda mentions, target: mentions == target,
-            "!=":   lambda mentions, target: mentions != target
-        }
-
-        comparator = COMPARISON_MODES[comparison]
+        comparator = get_comparison_func(comparison)
         return Rules.MentionNumber(comparator, target)
 
 
@@ -217,74 +159,52 @@ class TreeToObject(Transformer):
         return Rules.Random(float(value))
 
 
+    #User attributes
     def role_condition(self, target):
         return Rules.HasRole(target)
 
-    def user_contains_condition(self, *args):
-        CONTAINS_MODES = {
-            "any":    lambda message, targets: any(target in message for target in targets),
-            "all":    lambda message, targets: all(target in message for target in targets),
-            "none":   lambda message, targets: all(target not in message for target in targets),
-            "notall": lambda message, targets: not all(target in message for target in targets),
-            "one":    lambda message, targets: sum(1 for target in targets if target in message) == 1,
-            "only":   lambda message, targets: all(word in targets for word in message.split())
-        }
+    def user_contains_condition(self, op, string_match, targets):
+        if op == None:
+            evaluator = get_contains_func("any")
+        else:
+            evaluator = get_contains_func(op)
 
-        evaluator = CONTAINS_MODES["any"]
-
-        # Default cleaner (lowercase everything)
-        cleaner = lambda message: message.lower()
-        targets = []
-
-        for arg in args:
-            if isinstance(arg, list):
-                targets = arg
-            elif isinstance(arg, str):
-                if arg in CONTAINS_MODES:
-                    evaluator = CONTAINS_MODES[arg]
-                elif arg == "strict":
-                    # No cleaning
-                    cleaner = lambda message: message
+        if string_match == None:
+            cleaner = get_cleaner_func("loose")
+        else:
+            cleaner = get_cleaner_func(string_match)
 
         cleaned_targets = [cleaner(target) for target in targets]
         return Rules.UserContains(evaluator, cleaner, cleaned_targets)
 
 
-    def user_start_with_condition(self, *args):
-        # Default cleaner (lowercase everything)
-        cleaner = lambda message: message.lower()
-        target = ""
-
-        for arg in args:
-            if arg == "strict":
-                # No cleaning
-                cleaner = lambda message: message
-            else:
-                target = arg
-
+    def user_start_with_condition(self, string_match, target):
+        if string_match == None:
+            cleaner = get_cleaner_func("loose")
+        else:
+            cleaner = get_cleaner_func(string_match)
 
         cleaned_target = cleaner(target)
         return Rules.UserStartsWith(cleaner, cleaned_target)
 
 
-    def user_ends_with_condition(self, *args):
-        # Default cleaner (lowercase everything)
-        cleaner = lambda message: message.lower()
-        target = ""
-
-        for arg in args:
-            if arg == "strict":
-                # No cleaning
-                cleaner = lambda message: message
-            else:
-                target = arg
-
+    def user_ends_with_condition(self, string_match, target):
+        if string_match == None:
+            cleaner = get_cleaner_func("loose")
+        else:
+            cleaner = get_cleaner_func(string_match)
 
         cleaned_target = cleaner(target)
         return Rules.UserEndsWith(cleaner, cleaned_target)
 
 
-    #Primatives
+    #Variables
+    def word_list(self, words):
+        return words
+
+    def lexicon(self, lexicon):
+        return self.lexi_man.get_lexicon(lexicon)
+
     def string_list(self, *strings):
         return [s.strip('"') for s in strings]
 
@@ -296,3 +216,34 @@ class TreeToObject(Transformer):
 
     def STRING(self, tok):
         return str(tok)[1:-1]  # Remove quotes
+
+
+# Lamda functions
+def get_comparison_func(comparison):
+    COMPARISON_MODES = {
+        ">":    lambda message, target: message >  target,
+        "<":    lambda message, target: message <  target,
+        "==":   lambda message, target: message == target,
+        "!=":   lambda message, target: message != target
+    }
+
+    return COMPARISON_MODES[comparison]
+
+def get_contains_func(contains):
+    CONTAINS_MODES = {
+        "any":    lambda message, targets: any(target in message for target in targets),
+        "all":    lambda message, targets: all(target in message for target in targets),
+        "none":   lambda message, targets: all(target not in message for target in targets),
+        "notall": lambda message, targets: not all(target in message for target in targets),
+        "one":    lambda message, targets: sum(1 for target in targets if target in message) == 1,
+        "only":   lambda message, targets: all(word in targets for word in message.split())
+    }
+    return CONTAINS_MODES[contains]
+
+def get_cleaner_func(cleaner):
+    CLEANER_MODES = {
+        "loose":    lambda message: message.lower(),
+        "strict":   lambda message: message
+    }
+
+    return CLEANER_MODES[cleaner]

@@ -7,10 +7,9 @@ Finally, a way to randomly ban your chat for no reason at all!
 3. ~~Set up Rules screen~~
 4. ~~Set up settings~~
 5. ~~Finish rule set~~    
-6. Set up Lexicons
-    - Import & save text files
-    - Username as usable text
+6. ~~Set up Lexicons~~
 7. Set up Lexicon screen 
+8. write documenation
 
 
 # Bugs

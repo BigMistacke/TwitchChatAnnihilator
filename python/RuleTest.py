@@ -10,6 +10,33 @@ test_cases = [
         "pass_msg": TwitchMessage("No match here.")
     },
     {
+        "rules": '- contains[all "bing", "bong"]',
+        "ban_msg": TwitchMessage("bing bang bong"),
+        "pass_msg": TwitchMessage("bing bang")
+    },
+    {
+        "rules": '- contains[none "OwO", "UwU"]',
+        "ban_msg": TwitchMessage("bing bong UwU"),
+        "pass_msg": TwitchMessage("bing bong")
+    },
+    {
+        "rules": '- contains[notall "bing", "bong"]',
+        "ban_msg": TwitchMessage("bing bang"),
+        "pass_msg": TwitchMessage("bing bang bang")
+    },
+    {
+        "rules": '- contains[one "bing", "bong"]',
+        "ban_msg": TwitchMessage("bing bang"),
+        "pass_msg": TwitchMessage("bing bong")
+    },
+    {
+        "rules": '- contains[only "Bing"]',
+        "ban_msg": TwitchMessage("bing bing"),
+        "pass_msg": TwitchMessage("bing bong")
+    },
+
+
+    {
         "rules": '- starts_with["OwO"]',
         "ban_msg": TwitchMessage("OwO UwU"),
         "pass_msg": TwitchMessage("UwU OwO")

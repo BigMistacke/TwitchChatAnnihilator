@@ -29,7 +29,7 @@ condition_list: condition ("," condition)*
 logic_condition: LOGIC_OP "[" condition_list "]"
 
 # Message text match
-contains_condition: "contains" "[" [CONTAINS_OP] [STRING_MATCH] string_list "]"
+contains_condition: "contains" "[" [CONTAINS_OP] [STRING_MATCH] word_list "]"
 starts_with_condition: "starts_with" "[" [STRING_MATCH] STRING "]"
 ends_with_condition: "ends_with" "[" [STRING_MATCH] STRING "]"
 regex_condition: "regex" "[" STRING "]"
@@ -47,7 +47,7 @@ bit_condition: "bits" "[" COMP_OP INT "]"
 mention_condition: "mentions" "[" COMP_OP INT "]"
 
 //Username
-user_contains_condition: "user_contains" "[" [CONTAINS_OP] [STRING_MATCH] string_list "]"
+user_contains_condition: "user_contains" "[" [CONTAINS_OP] [STRING_MATCH] word_list "]"
 user_start_with_condition: "user_starts" "[" [STRING_MATCH] STRING "]"
 user_ends_with_condition: "user_ends" "[" [STRING_MATCH] STRING "]"
 role_condition: "role" "[" ROLE "]"
@@ -55,7 +55,10 @@ role_condition: "role" "[" ROLE "]"
 // Other
 random_condition: "random" "[" FLOAT "]"
 
+word_list: string_list | lexicon
 string_list: STRING ("," STRING)*
+lexicon: "lexicon" STRING
+
 
 LOGIC_OP: "all" | "notall" | "any" | "none" | "one"
 CONTAINS_OP: "all" | "notall" | "any" | "none" | "one" | "only"
