@@ -9,11 +9,11 @@ import IoManager
 
 
 class TwitchManager():
-    def __init__(self, filter, timeout_info, twitch_model):
+    def __init__(self, timeout_info, twitch_model):
         self._client_id = secrets.client_id
         self._scope = "moderator:manage:banned_users user:write:chat user:read:chat"
 
-        self._ban_bot = BanBot(filter, timeout_info)
+        self._ban_bot = BanBot(timeout_info)
         self._twitch_model = twitch_model
 
         self.stop_event = threading.Event()
@@ -27,13 +27,18 @@ class TwitchManager():
         if "refresh_token" in tokens:
             self._refresh_token = tokens["refresh_token"]
 
-            if not self._access_token == "":
+            self._renew_tokens()
+
+            if(self._access_token != ""):
                 self._get_user_id()
                 self.start_token_check()
 
+
+
         settings = IoManager.load_settings()
-        if "channel" in settings:
-            self.set_channel(setting["channel"])
+        if "channel_id" in settings:
+            self._ban_bot.set_channel(settings["channel_id"])
+            self._twitch_model.update_channel(settings["channel"])
 
 
 
@@ -110,7 +115,7 @@ class TwitchManager():
 
             time.sleep(interval)
 
-    def logout():
+    def logout(self):
         self.stop_event.set()
         self._twitch_model.update_login(False)
         self.start_ban_bot()
@@ -172,17 +177,17 @@ class TwitchManager():
         self._refresh_thread.start()
 
     def kill_manager(self):
-        self.stop_ban_bot()
         self.stop_event.set()
+        self.stop_ban_bot()
 
 
     #Catch 'invalid token' error, try to refresh token, otherwise 'logout'
     def start_ban_bot(self):
-        self._twitch_model.update_running(True)
+        self._twitch_model.update_is_running(True)
         self._ban_bot.start()
 
     def stop_ban_bot(self):
-        self._twitch_model.update_running(False)
+        self._twitch_model.update_is_running(False)
         self._ban_bot.stop()
 
 
@@ -202,8 +207,15 @@ class TwitchManager():
 
         if data["data"] != [] and data["data"][0]["id"]:
             try:
-                self._ban_bot.set_channel(data["data"][0]["id"])
+                channel_id = data["data"][0]["id"]
+                self._ban_bot.set_channel(channel_id)
                 self._twitch_model.update_channel(channel)
+
+                settings = IoManager.load_settings()
+                settings["channel"] = channel
+                settings["channel_id"] = channel_id
+                IoManager.save_settings(settings)
+
             except:
                 pass
                 #Should set up a proper error here

@@ -1,8 +1,20 @@
 
-
 class TwitchMessage:
-    def __init__(self, message_json):
-        event = message_json.get("event", {})
+    def __init__(self, body = "", username = "", reply = False, point_reward = "", created = "", roles = [], emotes = 0, cheer = 0, mentions = 0):
+        self.body = body
+        self.username = username
+        self.reply = reply
+        self.point_reward = point_reward
+        self.created = created
+        self.roles = roles
+        self.emotes = emotes
+        self.cheer = cheer
+        self.mentions = mentions
+
+
+    #This is a bit of a hack, but Python is mean and doesn't let me overload methods, so I guess I'll die.
+    def json_init(self, message_json):
+        event = message_json["payload"]["event"]
         message = event.get("message", {})
 
         self.body = message.get("text", {})
@@ -30,37 +42,3 @@ class TwitchMessage:
 
                 if fragment.get("mention", {})  != {}:
                     self.mentions.append(fragment.get("mention", {})).get("user_name")
-
-
-        # Cheeky backup code in case the above for-loop doesn't work
-        # for fragment in message.get("fragments", []):
-        #     ftype = fragment.get("type")
-
-        #     # Count emotes
-        #     if ftype == "emote":
-        #         if fragment.get("emote") is not None:
-        #             self.emotes += 1
-
-        #     # Count bits / cheermotes
-        #     if ftype == "cheermote":
-        #         cheermote = fragment.get("cheermote")
-        #         if cheermote and "bits" in cheermote:
-        #             self.bits += cheermote["bits"]
-
-        #     # Collect mentions
-        #     if ftype == "mention":
-        #         mention = fragment.get("mention")
-        #         if mention and "user_name" in mention:
-        #             self.mentions.append(mention["user_name"])
-
-
-    def __init__(self, body = "", username = "", reply = False, point_reward = "", created = "", roles = [], emotes = 0, cheer = 0, mentions = 0):
-        self.body = body
-        self.username = username
-        self.reply = reply
-        self.point_reward = point_reward
-        self.created = created
-        self.roles = roles
-        self.emotes = emotes
-        self.cheer = cheer
-        self.mentions = mentions

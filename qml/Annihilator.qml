@@ -14,7 +14,7 @@ Item {
                 id: ruleSetCombo
                 Layout.preferredWidth: 300
                 model: DataModel.rule_list
-                currentIndex: DataModel.current_index
+                currentIndex: DataModel.current_rule_index
 
                 onActivated: function(index) {
                     EventHandler.select_rule(index)
@@ -22,7 +22,7 @@ Item {
             }
 
             Button {
-                text: TwitchModel.current_running ? "Show Mercy" : "Commence Annihilation"
+                text: TwitchModel.is_running ? "Show Mercy" : "Commence Annihilation"
                 Layout.preferredWidth: 300
                 Layout.fillHeight: true
                 font.pixelSize: 24
@@ -30,20 +30,18 @@ Item {
                 background: Rectangle {
                     anchors.fill: parent
                     color: {
-                        if(TwitchModel.current_running){
+                        if(TwitchModel.is_running){
                             parent.down ? darkenColor("#12e04c", 0.3) : (parent.hovered ? "#12e04c" : darkenColor("#12e04c", 0.1))
-                            // EventHandler.start_ban_bot()
                         }else {
                             parent.down ? darkenColor("#a81b1b", 0.3) : (parent.hovered ? "#a81b1b" : darkenColor("#a81b1b", 0.1))
-                            // EventHandler.stop_ban_bot()
                         }
                     }
                 }
                 onClicked: {
-                    if(TwitchModel.current_running){
-                        EventHandler.start_ban_bot()
-                    }else {
+                    if(TwitchModel.is_running){
                         EventHandler.stop_ban_bot()
+                    }else {
+                        EventHandler.start_ban_bot()
                     }
                 }
             }

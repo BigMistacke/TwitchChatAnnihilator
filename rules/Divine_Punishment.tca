@@ -1,3 +1,2 @@
-timeout 30 cooldown 3600 reason "Smited by god": [
+timeout 30 cooldown 3600 reason "Smited by god" -
     random[0.01]
-]

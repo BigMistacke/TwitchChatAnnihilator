@@ -2,9 +2,14 @@ import json
 import os
 import string
 
+
+base_path = "./"
+
+
 def load_tokens():
-    if os.path.exists('tokens.json'):
-        with open('tokens.json', 'r') as file:
+    file_path = base_path + 'tokens.json'
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
             try:
                 return json.load(file)
             except json.JSONDecodeError:
@@ -14,13 +19,15 @@ def load_tokens():
         return {}
 
 def save_tokens(tokens):
-    with open('tokens.json', 'w') as file:
+    file_path = base_path + 'tokens.json'
+    with open(file_path, 'w') as file:
         json.dump(tokens, file)
 
 
 def load_settings():
-    if os.path.exists('settings.json'):
-        with open('settings.json', 'r') as file:
+    file_path = base_path + 'settings.json'
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as file:
             try:
                 return json.load(file)
             except json.JSONDecodeError:
@@ -30,63 +37,73 @@ def load_settings():
         return {}
 
 def save_settings(settings):
-    with open('settings.json', 'w') as file:
+    file_path = base_path + 'settings.json'
+    with open(file_path, 'w') as file:
         json.dump(settings, file)
 
 def retrieve_rule_list():
+    file_path = base_path + 'rules'
+
     rule_list = []
-    if os.path.exists("./rules"):
-        for f in os.scandir("./rules"):
+    if os.path.exists(file_path):
+        for f in os.scandir(file_path):
             if f.is_file() and f.name.endswith(".tca"):
                 rule_list.append(f.name[:-4])
     else:
-        os.mkdir("./rules")
+        os.mkdir(file_path)
 
     return sorted(rule_list)
 
 def retrieve_rule(name):
-    if os.path.exists("./rules/"+name+".tca"):
-        with open("./rules/"+name+".tca", 'r') as file:
+    file_path = base_path + 'rules/'
+    if os.path.exists(file_path + name + ".tca",):
+        with open(file_path + name + ".tca", 'r') as file:
             return file.read()
 
 
 def save_rule(name, rule):
-    with open("./rules/"+name+".tca", 'w') as file:
+    file_path = base_path + 'rules/'
+    with open(file_path + name + ".tca", 'w') as file:
         return file.write(rule)
 
 def delete_rule(name):
-    if os.path.exists("./rules/"+name+".tca"):
-        os.remove("./rules/"+name+".tca")
+    file_path = base_path + 'rules/'
+    if os.path.exists(file_path + name + ".tca"):
+        os.remove(file_path + name + ".tca")
 
 
 def new_rule():
+    file_path = base_path + 'rules/'
+
     rule_name = "new_rule"
     counter = 1
 
-    blank_rule = """timeout 5 cooldown 0: [
+    blank_rule = """timeout 15 cooldown 0 reason "new rule" -
+    contains["words"]
+"""
 
-]"""
-
-    if os.path.exists("./rules/"+rule_name+".tca"):
-        while os.path.exists("./rules/"+rule_name+str(counter)+".tca"):
+    if os.path.exists(file_path + rule_name + ".tca"):
+        while os.path.exists("./rules/"+"new_rule"+str(counter)+".tca"):
             counter += 1
 
-        rule_name = rule_name + str(counter)
-        with open("./rules/"+rule_name+".tca", 'w') as file:
+        rule_name = "new_rule" + str(counter)
+        with open(file_path + rule_name + ".tca", 'w') as file:
             file.write(blank_rule)
 
     else:
-        with open("./rules/"+rule_name+".tca", 'w') as file:
+        with open(file_path + rule_name + ".tca", 'w') as file:
             file.write(blank_rule)
 
     return rule_name
 
 
 def load_messages_said():
+    file_path = base_path + 'said_messages.txt'
+
     loaded_messages= []
 
     try:
-        with open("said_messages.txt", 'r') as f:
+        with open(file_path, 'r') as f:
             # Read all lines from the file
             lines = f.readlines()
 
@@ -99,15 +116,17 @@ def load_messages_said():
         return []
 
 def save_messages_said(messages):
-    with open("said_messages.txt", 'w') as f:
+    file_path = base_path + 'said_messages.txt'
+    with open(file_path, 'w') as f:
         for message in messages:
             f.write(word + '\n')
 
 def load_words_said():
+    file_path = base_path + 'said_words.txt'
     loaded_words = []
 
     try:
-        with open("said_words.txt", 'r') as f:
+        with open(file_path, 'r') as f:
             # Read all lines from the file
             lines = f.readlines()
 
@@ -120,29 +139,47 @@ def load_words_said():
         return []
 
 def save_words_said(words):
-    with open("said_words.txt", 'w') as f:
+    file_path = base_path + 'said_words.txt'
+    with open(file_path, 'w') as f:
         for word in words:
             f.write(word + '\n')
 
 
 
-def load_lexicon(lexicon):
-    with open(lexicon + ".json", 'r') as file:
-        loaded_list = json.load(file)
+def get_lexicon_list():
+    file_path = base_path + 'lexicons/'
+    lexicon_list = []
+    if os.path.exists(file_path):
+        for f in os.scandir(file_path):
+            if f.is_file() and f.name.endswith(".lex"):
+                lexicon_list.append(f.name[:-4])
+    else:
+        os.mkdir(file_path)
+
+    return sorted(lexicon_list)
+
+
+def load_lexicon(lexicon, loadList = True):
+    file_path = base_path + 'lexicons/' + lexicon + ".lex"
+    with open(file_path, 'r') as file:
+        if loadList:
+            loaded_list = json.load(file)
+        else:
+            loaded_list = file.read()[1:-1]
         return loaded_list
 
 
 def save_lexicon(name, lexicon_string):
+    file_path = base_path + 'lexicons/' + name + '.lex'
     lexicon_list = json.loads("[" + lexicon_string + "]")
 
     #Remove non-unique elements
     unique_elements = set(lexicon_list)
     lexicon = list(unique_elements)
 
-    file_path = name + ".json"
-
     with open(file_path, 'w') as file:
-        json.dump(lexicon, file, indent=4)
+        json.dump(lexicon, file)
+
 
 def import_lexicon(file_path):
     try:
@@ -163,4 +200,31 @@ def import_lexicon(file_path):
     #Remove non-unique elements
     unique_elements = set(word_list)
     lexicon = list(unique_elements)
-    return json.dumps(lexicon)
+    return json.dumps(lexicon)[1:-1]
+
+def new_lexicon():
+    file_path = base_path + 'lexicons/'
+
+    lexicon_name = "new_lexicon"
+    counter = 1
+
+    blank_lexicon = "[]"
+
+    if os.path.exists(file_path + lexicon_name + ".lex"):
+        while os.path.exists(file_path+"new_lexicon"+str(counter)+".lex"):
+            counter += 1
+
+        lexicon_name = "new_lexicon" + str(counter)
+        with open(file_path + lexicon_name + ".lex", 'w') as file:
+            file.write(blank_lexicon)
+
+    else:
+        with open(file_path + lexicon_name + ".lex", 'w') as file:
+            file.write(blank_lexicon)
+
+    return lexicon_name
+
+def delete_lexicon(name):
+    file_path = base_path + 'lexicons/'
+    if os.path.exists(file_path + name + ".lex"):
+        os.remove(file_path + name + ".lex")

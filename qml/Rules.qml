@@ -158,7 +158,7 @@ Item {
                 id: ruleSetCombo
                 Layout.preferredWidth: 300
                 model: DataModel.rule_list
-                currentIndex: DataModel.current_index
+                currentIndex: DataModel.current_rule_index
 
                 onActivated: function(index) {
                     EventHandler.select_rule(index)
@@ -197,11 +197,17 @@ Item {
                     let keys = Object.keys(dict)
                     let results = ""
 
-                    for (let i = 0; i < keys.length; i++) {
-                        let key = keys[i]
-                        let value = dict[key]
-                        results = results + key + ": " + value + "%\n"
+                    if(keys.length == 0) {
+                        results = "Message is valid"
+                    } else{
+                        results = "Message is invalid, results:\n"
+                        for (let i = 0; i < keys.length; i++) {
+                            let key = keys[i]
+                            let value = dict[key]
+                            results = results + key + ": " + value + "%\n"
+                        }
                     }
+
                     testResults.text = results
                 }
             }
@@ -241,14 +247,15 @@ Item {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 50
-            color: "#eeeeee"
+            Layout.preferredHeight: 150
+            color: "dimgray"
             border.color: "#cccccc"
 
             Text {
                 id: testResults
                 anchors.centerIn: parent
                 text: ""
+                color: "white"
                 wrapMode: Text.WordWrap
             }
         }

@@ -8,7 +8,7 @@ Item {
     Popup {
         id: linkPopup
         anchors.centerIn: Overlay.overlay
-        width: 400
+        width: 500
         height: 100
         modal: true
         focus: true
@@ -58,7 +58,7 @@ Item {
             }
 
             onClicked: {
-                if(!TwitchModel.Current_login) {
+                if(!TwitchModel.current_login) {
                     var result = EventHandler.login()
 
                     linkLabel.text = "<a href='" + result.url + "'>" + result.url + "</a>"

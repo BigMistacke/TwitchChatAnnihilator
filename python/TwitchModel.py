@@ -46,10 +46,10 @@ class TwitchModel(QAbstractListModel):
 
 
     @Property(bool, notify=runningChanged)
-    def current_running(self):
+    def is_running(self):
         return self._running
 
     @Slot()
-    def update_running(self, is_running):
+    def update_is_running(self, is_running):
         self._running = is_running
         self.runningChanged.emit()

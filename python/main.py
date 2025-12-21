@@ -20,14 +20,9 @@ def main():
     app = QApplication(sys.argv)
     engine = QQmlApplicationEngine()
 
-
-    rule_list = IoManager.retrieve_rule_list()
-    current_rule = IoManager.retrieve_rule(rule_list[0])
-    filter = Filter.create_filter(current_rule)
-
     twitch_model = TwitchModel()
     timeout_info = TimeoutInfo()
-    twitch_manager = TwitchManager(filter, timeout_info, twitch_model)
+    twitch_manager = TwitchManager(timeout_info, twitch_model)
 
     data_model = DataModel()
     event_handler = EventHandler(twitch_manager, data_model, twitch_model)
@@ -44,8 +39,8 @@ def main():
     if not engine.rootObjects():
         sys.exit(-1)
 
+    app.aboutToQuit.connect(twitch_manager.kill_manager)
     sys.exit(app.exec())
-    twitch_model.kill_manager()
 
 if __name__ == "__main__":
     main()
