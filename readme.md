@@ -6,7 +6,7 @@ Finally, a way to randomly ban your chat for no reason at all!
 ## Rule Language Guide
 The Twitch Chat Annihilator uses a custom language to define its rules. Each rule consists of optional settings, a separator (`-`), and a logical condition for the rule to time someone out.
 
-### 📋 Rule Syntax
+### Rule Syntax
 A rule is structured as follows:
 `timeout DURATION_IN_SECONDS cooldown DURATION_IN_SECONDS reason "REASON" - CONDITION []`
 
@@ -18,7 +18,7 @@ A rule is structured as follows:
 
 ---
 
-### 🧠 Logic & Grouping
+### Logic & Grouping
 Multiple conditions can be grouped together in a rule in order to make a more complex set of conditions.  
 
 | Operator | Description | Syntax |
